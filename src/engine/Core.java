@@ -57,7 +57,7 @@ public class Core extends Canvas implements Runnable {
     // screen constructors to register within the state machine
     private void initScreens() {
         menuScreen = new MenuScreen(this, states, files);
-        gameScreen = new GameScreen(this, states, input, files);
+        gameScreen = new GameScreen(this, states, input, files, sound);
         gameOverScreen = new GameOverScreen(this, states);
         highScoreScreen = new HighScoreScreen(this, states, files);
 

@@ -7,6 +7,8 @@ import engine.InputManager;
 import engine.FileManager;
 import entity.*;
 import engine.SoundManager; // <-- added this for sound
+import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 
 import java.awt.*;
 
@@ -22,7 +24,7 @@ public class GameScreen implements Screen { // implementing screen base
     private final int cols = Core.WIDTH / unit;
     private final int rows = Core.HEIGHT / unit;
 
-    private boolean wrap = false; // set false for border walls
+    private final  boolean wrap = false; // set false for border walls
     private boolean[][] walls;             // environment grid
     private final CollisionHandler collider = new CollisionHandler();
 
@@ -56,12 +58,12 @@ public class GameScreen implements Screen { // implementing screen base
         foodsEaten++; // counting the score
     }
 
-    public GameScreen(Core core, StateMachine states, InputManager input, FileManager fileManager) {
+    public GameScreen(Core core, StateMachine states, InputManager input, FileManager fileManager,SoundManager soundManager) {
         this.core = core; // stores reference
         this.states = states;
         this.input = input;
-        this.fileManager= fileManager;
-        this.soundManager = new SoundManager(); // initialize sound manager
+        this.fileManager = fileManager;
+        this.soundManager = soundManager; // initialize sound manager
 
         // ensure effect timers / flags are reset
         this.shakeTime = 0.0;
@@ -80,8 +82,26 @@ public class GameScreen implements Screen { // implementing screen base
         moveInterval = 0.25;   // reset to base speed
     }
     private void saveScore() {
-        String playerName = fileManager.getSetting("player_name", "PLAYER1");
-        fileManager.addScore(playerName, foodsEaten);
+        final int finalScore = foodsEaten;
+
+        SwingUtilities.invokeLater(() -> {
+            // This version handles the Object return properly
+            Object response = JOptionPane.showInputDialog(
+                    "Enter your name for score: " + finalScore
+            );
+
+            String playerName = "Player"; // Default
+
+            if (response != null) {
+                String name = response.toString().trim();
+                if (!name.isEmpty()) {
+                    playerName = name;
+                }
+            }
+
+            fileManager.addScore(playerName, finalScore);
+            System.out.println("Score saved for: " + playerName);
+        });
     }
 
     @Override
