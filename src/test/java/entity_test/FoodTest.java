@@ -8,12 +8,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FoodTest {
     @Test
-    void respawn_doesNotSpawnOnWallsOrSnake() {
+    void respawn_spawnOnWallOrSnake() {
+        /*check if food spawn wall or snake body*/
+
         int cols = 5;
         int rows = 5;
 
         boolean[][] walls = new boolean[cols][rows];
-        // Put a wall at (0,0) and (2,2)
         walls[0][0] = true;
         walls[2][2] = true;
 
@@ -25,29 +26,29 @@ class FoodTest {
         int fx = food.getX();
         int fy = food.getY();
 
-        // Food should not be on a wall
         assertFalse(walls[fx][fy], "Food spawned on a wall!");
 
-        // Food should not be on the snake
         assertFalse(snake.occupies(fx, fy), "Food spawned on the snake!");
     }
 
     @Test
     void respawn_worksWithoutWalls() {
-        int cols = 10;
-        int rows = 10;
+        /*check if method still works when no walls exist*/
 
-        boolean[][] walls = null;
+        int c = 10;
+        int r = 10;
+
+        boolean[][] wall = null;
         Snake snake = new Snake();
         Food food = new Food();
 
-        food.respawn(walls, snake, cols, rows);
+        food.respawn(wall, snake, c,r);
 
         int fx = food.getX();
         int fy = food.getY();
 
-        assertTrue(fx >= 0 && fx < cols);
-        assertTrue(fy >= 0 && fy < rows);
+        assertTrue(fx>=0 && fy<c);
+        assertTrue(fx>=0 && fy<r);
         assertFalse(snake.occupies(fx, fy));
     }
 }

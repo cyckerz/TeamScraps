@@ -18,4 +18,11 @@ public class Food {
     public void render(Graphics g, int unit) {
         g.fillRect(x*unit, y*unit, unit, unit);
     }
+
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 }
+
+

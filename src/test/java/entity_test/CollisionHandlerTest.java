@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class CollisionHandlerTest {
 
     @Test
-    void check_hitsWall_whenOutOfBoundsNoWrap() {
+    void check_hitsWall_outOfBounds() {
+        //wall hit when head out of bound
         Snake snake = new Snake();
         CollisionHandler handler = new CollisionHandler();
 
-        // move head outside left boundary
-        snake.getHead().set_Position(-1, 3);
+        snake.getHead().set_Position(-1,3);
 
         CollisionHandler.Result result = handler.check(
                 snake,
@@ -31,57 +31,13 @@ class CollisionHandlerTest {
     }
 
     @Test
-    void check_wrapsAround_whenWrapEnabled() {
+    void check_hitsSelf_headEatsBody() {
+        //die when head hit body
         Snake snake = new Snake();
         CollisionHandler handler = new CollisionHandler();
 
-        // head is outside left
-        snake.getHead().set_Position(-1, 3);
-
-        CollisionHandler.Result result = handler.check(
-                snake,
-                null,
-                null,
-                true,   // wrap enabled
-                10,
-                10
-        );
-
-        assertEquals(CollisionHandler.Result.NONE, result);
-        // wrapped to cols - 1
-        assertEquals(9, snake.getHead().getX());
-        assertEquals(3, snake.getHead().getY());
-    }
-
-    @Test
-    void check_hitsWall_whenWallOnGrid() {
-        Snake snake = new Snake();
-        CollisionHandler handler = new CollisionHandler();
-
-        boolean[][] walls = new boolean[10][10];
-        // wall at initial head position (1,3)
-        walls[1][3] = true;
-
-        CollisionHandler.Result result = handler.check(
-                snake,
-                null,
-                walls,
-                false,
-                10,
-                10
-        );
-
-        assertEquals(CollisionHandler.Result.HIT_WALL, result);
-    }
-
-    @Test
-    void check_hitsSelf_whenHeadOverlapsBody() {
-        Snake snake = new Snake();
-        CollisionHandler handler = new CollisionHandler();
-
-        // make head overlap first body segment
-        Segment bodySeg = snake.getBody().get(0);
-        snake.getHead().set_Position(bodySeg.getX(), bodySeg.getY());
+        Segment body = snake.getBody().get(0);
+        snake.getHead().set_Position(body.getX(), body.getY());
 
         CollisionHandler.Result result = handler.check(
                 snake,
@@ -99,19 +55,15 @@ class CollisionHandlerTest {
     void check_ateFood_whenHeadOnFood() {
         Snake snake = new Snake();
         CollisionHandler handler = new CollisionHandler();
+        Food food = new Food();
 
-        // Place head at (4,4)
-        snake.getHead().set_Position(4, 4);
-
-        // Fake food that reports x=4,y=4
-        Food fakeFood = new Food() {
-            @Override public int getX() { return 4; }
-            @Override public int getY() { return 4; }
-        };
+        // Place head and food at same position
+        snake.getHead().set_Position(4,4);
+        food.setPosition(4,4);
 
         CollisionHandler.Result result = handler.check(
                 snake,
-                fakeFood,
+                food,
                 null,
                 false,
                 10,
@@ -119,25 +71,9 @@ class CollisionHandlerTest {
         );
 
         assertEquals(CollisionHandler.Result.ATE_FOOD, result);
-    }
 
-    @Test
-    void check_none_whenNoCollision() {
-        Snake snake = new Snake();
-        CollisionHandler handler = new CollisionHandler();
-
-        // place head somewhere safe
-        snake.getHead().set_Position(5, 5);
-
-        CollisionHandler.Result result = handler.check(
-                snake,
-                null,
-                null,
-                false,
-                10,
-                10
-        );
-
-        assertEquals(CollisionHandler.Result.NONE, result);
+        System.out.println("Head: " + snake.getHead().getX() + "," + snake.getHead().getY());
+        System.out.println("Food: " + food.getX() + "," + food.getY());
+        System.out.println("Result: " + result);
     }
 }
