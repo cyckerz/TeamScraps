@@ -152,9 +152,9 @@ public class Core extends Canvas implements Runnable {
         currentScreen().onEnter();  // screen handles setup
     }
 
-    /* helper for later when ashley adds sounds - to keep constructors valid
+    /*helper for later when ashley adds sounds - to keep constructors valid*/
     public SoundManager getSound() {
         return sound;
-    } */
+    }
 }
 
