@@ -12,14 +12,13 @@ import java.awt.image.BufferStrategy;
 
 public class Core extends Canvas implements Runnable {
 
-    public static final int WIDTH = 800, HEIGHT = 600;
+    public static final int WIDTH = 864, HEIGHT = 624;
     private static final double FIXED_DT = 1.0 / 60.0;
 
     // ---- State & subsystems (owned by other roles, just referenced here) ----
     private final StateMachine states = new StateMachine();
     private Screen menuScreen, gameScreen, gameOverScreen, highScoreScreen;   // (chloe)
 
-    // the following were enabled so the rest of script would work - chloe
     private final InputManager input = new InputManager(this); // (melih)
     private final SoundManager sound = new SoundManager(); // (ashley)
     private final FileManager files = new FileManager(); // (dami)
