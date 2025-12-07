@@ -4,6 +4,7 @@ package entity;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 public class Snake {
     public enum Direction { UP, DOWN, LEFT, RIGHT }
@@ -62,4 +63,42 @@ public class Snake {
             g.fillOval(s.getX()*unitSize, s.getY()*unitSize, unitSize, unitSize);
         }
     }
+
+    // for body of snake to be oriented right
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void reverse() {
+        // nothing to do for length 0–1
+        if (segments.size() <= 1) return;
+
+        // Reverse the order of the segment list so tail becomes head
+        Collections.reverse(segments);
+
+        // After reversing, set the direction so the head will continue along the body rather than into it.
+        Segment head = segments.get(0);   // new head (old tail)
+        Segment neck = segments.get(1);   // second segment
+
+        int dx = neck.getX() - head.getX();
+        int dy = neck.getY() - head.getY();
+
+        if (dx == 1) {
+            // neck is to the RIGHT of head, so we must move LEFT
+            direction = Direction.LEFT;
+        } else if (dx == -1) {
+            // neck is to the LEFT of head, so we must move RIGHT
+            direction = Direction.RIGHT;
+        } else if (dy == 1) {
+            // neck is BELOW head, so we must move UP
+            direction = Direction.UP;
+        } else if (dy == -1) {
+            // neck is ABOVE head, so we must move DOWN
+            direction = Direction.DOWN;
+        }
+    }
+
+
+
+
 }

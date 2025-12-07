@@ -9,6 +9,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
+import engine.SpriteLoader;
+import java.awt.image.BufferedImage;
+
+import java.awt.Font;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 
 // menu implementation
 public class MenuScreen implements Screen, MouseListener {
@@ -17,7 +24,13 @@ public class MenuScreen implements Screen, MouseListener {
     private final StateMachine states;
     private final FileManager files; // not used yet, but available if needed later
 
+    // background + fonts
+    private BufferedImage menuBackground;
+    private Font titleFont;
+    private Font buttonFont;
+
     // simple button hitboxes
+    private BufferedImage stoneTile;
     private Rectangle startBtn;
     private Rectangle highScoreBtn;
     private Rectangle quitBtn;
@@ -26,7 +39,23 @@ public class MenuScreen implements Screen, MouseListener {
         this.core = core;
         this.states = states;
         this.files = files;
+
+        loadFonts();
         initButtons();
+
+        menuBackground = SpriteLoader.load("resources/backgrounds/front.jpg");
+        stoneTile      = SpriteLoader.load("resources/sprites/button.png");
+    }
+
+    private void loadFonts() {
+        try (InputStream in = new FileInputStream("resources/fonts/alagard.ttf")) {
+            Font base = Font.createFont(Font.TRUETYPE_FONT, in);
+            titleFont = base.deriveFont(Font.BOLD, 140f);   // big title
+            buttonFont = base.deriveFont(Font.PLAIN, 26f); // menu buttons
+        } catch (Exception e) {
+            titleFont = new Font("Arial", Font.BOLD, 80);
+            buttonFont = new Font("Arial", Font.PLAIN, 26);
+        }
     }
 
     // layout buttons
@@ -59,39 +88,74 @@ public class MenuScreen implements Screen, MouseListener {
 
     @Override
     public void render(Graphics2D g) {
+        g.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+        );
+
         // background
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, Core.WIDTH, Core.HEIGHT);
+        if (menuBackground != null) {
+            g.drawImage(menuBackground, 0, 0, Core.WIDTH, Core.HEIGHT, null);
+        } else {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, Core.WIDTH, Core.HEIGHT);
+        }
 
-        // title
-        g.setColor(Color.GREEN);
-        g.setFont(new Font("Arial", Font.BOLD, 56));
-        drawCentered(g, "SNAKE", Core.WIDTH, 140);
+        // title + shadow using BIG titleFont
+        g.setFont(titleFont);
 
-        // buttons
+        // shadow
+        g.setColor(new Color(0, 0, 0, 180));
+        drawCentered(g, "SNAKE", Core.WIDTH + 3, 190 + 3);
+
+        // main text
+        g.setColor(new Color(255, 140, 0));
+        drawCentered(g, "SNAKE", Core.WIDTH, 190);
+
+        // buttons (unchanged, they use buttonFont inside drawButton)
         drawButton(g, startBtn, "Start Game");
         drawButton(g, highScoreBtn, "High Scores");
         drawButton(g, quitBtn, "Quit");
     }
 
     private void drawButton(Graphics2D g, Rectangle rect, String text) {
-        g.setColor(Color.DARK_GRAY);
-        g.fill(rect);
-        g.setColor(Color.WHITE);
-        g.draw(rect);
+        // --- stone background ---
+        if (stoneTile != null) {
+            // draw the button.png scaled to the button rect
+            g.drawImage(stoneTile,
+                    rect.x, rect.y,
+                    rect.x + rect.width, rect.y + rect.height,
+                    0, 0, stoneTile.getWidth(), stoneTile.getHeight(),
+                    null);
+        } else {
+            // fallback flat fill if image missing
+            g.setColor(new Color(40, 40, 40, 220));
+            g.fill(rect);
+        }
 
-        g.setFont(new Font("Arial", Font.PLAIN, 24));
+        // --- chunky pixel-style border ---
+        g.setColor(new Color(10, 10, 10));                 // dark outer edge
+        g.drawRect(rect.x, rect.y, rect.width, rect.height);
+
+        g.setColor(new Color(130, 130, 130));              // lighter inner edge
+        g.drawRect(rect.x + 2, rect.y + 2,
+                rect.width - 4, rect.height - 4);
+
+        // --- label ---
+        g.setFont(buttonFont);
+        g.setColor(new Color(235, 235, 235));              // slightly off-white
         FontMetrics fm = g.getFontMetrics();
-        Rectangle2D bounds = fm.getStringBounds(text, g);
-        int tx = rect.x + (rect.width  - (int) bounds.getWidth())  / 2;
-        int ty = rect.y + (rect.height - (int) bounds.getHeight()) / 2 + fm.getAscent();
+
+        int tx = rect.x + (rect.width - fm.stringWidth(text)) / 2;
+        int ty = rect.y + (rect.height + fm.getAscent()) / 2 - 4;
+
         g.drawString(text, tx, ty);
     }
 
+
     private void drawCentered(Graphics2D g, String text, int width, int y) {
         FontMetrics fm = g.getFontMetrics();
-        Rectangle2D bounds = fm.getStringBounds(text, g);
-        int x = (int) ((width - bounds.getWidth()) / 2);
+        int x = (width - fm.stringWidth(text)) / 2;
         g.drawString(text, x, y);
     }
 
@@ -99,8 +163,6 @@ public class MenuScreen implements Screen, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println("CLICK at " + e.getPoint());  // debug line
-
         Point p = e.getPoint();
 
         if (startBtn.contains(p)) {
