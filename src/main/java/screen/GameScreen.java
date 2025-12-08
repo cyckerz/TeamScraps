@@ -157,6 +157,7 @@ public class GameScreen implements Screen { // implementing screen base
     }
 
     public void onExit() {
+        soundManager.stopMove(); // ⬅️ extra safety: kill any move sound
         soundManager.stopBGM(); // stop background music when leaving screen
 
         // ensure no lingering visual effects
@@ -256,6 +257,7 @@ public class GameScreen implements Screen { // implementing screen base
             case HIT_SELF:
             case HIT_WALL:
                 // trigger effects
+                soundManager.stopMove();     // stop moving sound
                 soundManager.playHit(); // collision sound
                 soundManager.stopBGM();    // stop music immediately on death
                 shakeTime = shakeDuration;   // start shake
@@ -553,6 +555,3 @@ public class GameScreen implements Screen { // implementing screen base
 
 
 }
-
-
-
